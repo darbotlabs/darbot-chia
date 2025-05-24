@@ -661,6 +661,13 @@ data_layer:
   # Enable to store all .DAT files grouped by store id
   group_files_by_store: False
 
+mcp:
+  enable: False
+  port: 8550
+  ssl:
+    private_crt: "config/ssl/daemon/private_daemon.crt"
+    private_key: "config/ssl/daemon/private_daemon.key"
+
 simulator:
   # Should the simulator farm a block whenever a transaction is in mempool
   auto_farm: True
