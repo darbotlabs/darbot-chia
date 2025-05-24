@@ -70,6 +70,8 @@ setuptools = ">=75.5.0"
 sortedcontainers = ">=2.4.0"  # For maintaining sorted mempools
 typing-extensions = ">=4.12.2"  # typing backports like Protocol and TypedDict
 watchdog = ">=4.0.1"  # Filesystem event watching - watches keyring.yaml
+fastapi = ">=0.109"
+uvicorn = { version = ">=0.29", extras = ["standard"] }
 zstd = [
 	{version=">=1.5.5.1", python = "<3.12"},
 	{version=">=1.5.5.1", python = "3.12", source="chia"},

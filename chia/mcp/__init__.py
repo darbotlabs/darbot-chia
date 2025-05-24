@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+
 from collections.abc import Awaitable
 from typing import Any, Callable, TypeVar
 
@@ -14,3 +15,17 @@ def mcp_tool(schema: dict[str, Any]) -> Callable[[T], T]:
         return func
 
     return decorator
+
+from chia.mcp.registry import add_schema_endpoint, mcp_tool, registry
+
+__all__ = [
+    "add_schema_endpoint",
+    "mcp_tool",
+    "registry",
+]
+
+from .server import run_mcp_server
+
+__all__ = ["run_mcp_server"]
+
+
