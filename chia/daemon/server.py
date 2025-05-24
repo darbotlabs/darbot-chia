@@ -30,6 +30,7 @@ from chia.cmds.passphrase_funcs import default_passphrase, using_default_passphr
 from chia.consensus.coinbase import create_puzzlehash_for_pk
 from chia.daemon.keychain_server import KeychainServer, keychain_commands
 from chia.daemon.windows_signal import kill
+from chia.mcp.server import run_mcp_server
 from chia.plotters.plotters import get_available_plotters
 from chia.plotting.util import add_plot_directory
 from chia.server.server import ssl_context_for_server
@@ -37,7 +38,7 @@ from chia.server.signal_handlers import SignalHandlers
 from chia.util.bech32m import encode_puzzle_hash
 from chia.util.chia_logging import initialize_service_logging
 from chia.util.chia_version import chia_short_version
-from chia.util.config import load_config
+from chia.util.config import load_config, save_config
 from chia.util.errors import KeychainCurrentPassphraseIsInvalid
 from chia.util.json_util import dict_to_json_str
 from chia.util.keychain import Keychain, KeyData, passphrase_requirements, supports_os_passphrase_storage
@@ -1544,7 +1545,8 @@ async def async_run_daemon(root_path: Path, wait_for_unlock: bool = False) -> in
     # When wait_for_unlock is true, we want to skip the check_keys() call in chia_init
     # since it might be necessary to wait for the GUI to unlock the keyring first.
     chia_init(root_path, should_check_keys=(not wait_for_unlock))
-    config = load_config(root_path, "config.yaml")
+    config = load_config(root_path, "config.yaml", fill_missing_services=True)
+    save_config(root_path, "config.yaml", config)
     setproctitle("chia_daemon")
     initialize_service_logging("daemon", config, root_path=root_path)
     crt_path = root_path / config["daemon_ssl"]["private_crt"]
@@ -1574,7 +1576,15 @@ async def async_run_daemon(root_path: Path, wait_for_unlock: bool = False) -> in
             async with SignalHandlers.manage() as signal_handlers:
                 await ws_server.setup_process_global_state(signal_handlers=signal_handlers)
                 async with ws_server.run():
-                    await ws_server.shutdown_event.wait()
+                    mcp_task = None
+                    if config.get("mcp", {}).get("enable", False):
+                        mcp_task = create_referenced_task(run_mcp_server(config))
+                    try:
+                        await ws_server.shutdown_event.wait()
+                    finally:
+                        if mcp_task is not None:
+                            mcp_task.cancel()
+                            await cancel_task_safe(mcp_task)
 
             if beta_metrics is not None:
                 await beta_metrics.stop_logging()

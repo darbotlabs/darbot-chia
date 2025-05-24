@@ -307,7 +307,7 @@ def selected_network_address_prefix(config: dict[str, Any]) -> str:
 
 
 def load_defaults_for_missing_services(config: dict[str, Any], config_name: str) -> dict[str, Any]:
-    services = ["data_layer"]
+    services = ["data_layer", "mcp"]
     missing_services = [service for service in services if service not in config]
     defaulted = {}
     if len(missing_services) > 0:
