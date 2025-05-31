@@ -309,3 +309,11 @@ tags
 # Ignore the binaries that are pulled for the installer
 /bladebit/
 /madmax/
+
+# VSCode extension and npm package artifacts
+vscode-extension/node_modules/
+vscode-extension/dist/
+vscode-extension/*.vsix
+npm-package/node_modules/
+npm-package/dist/
+npm-package/*.tgz

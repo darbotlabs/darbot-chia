@@ -10,9 +10,9 @@ if TYPE_CHECKING:
 
 
 @mcp_tool("full_node", "get_blockchain_state", schema={
-    "description": "Get the current state of the blockchain",
+    "description": "Get comprehensive blockchain state including current height, peak block, difficulty, network space, sync status, and mempool information. Essential for monitoring blockchain health and progress.",
     "parameters": {},
-    "returns": {"type": "object", "description": "Current blockchain state including peak, difficulty, etc."}
+    "returns": {"type": "object", "description": "Detailed blockchain state with peak block, sync status, difficulty, space, and mempool data"}
 })
 async def get_blockchain_state(pool: "ClientPool", params: dict[str, Any]) -> Any:
     """Get the current state of the blockchain."""
@@ -25,11 +25,11 @@ async def get_blockchain_state(pool: "ClientPool", params: dict[str, Any]) -> An
 
 
 @mcp_tool("full_node", "get_block", schema={
-    "description": "Get a block by its header hash",
+    "description": "Retrieve a complete block by its header hash, including all transactions, proofs, and metadata. Useful for detailed block analysis and transaction history.",
     "parameters": {
-        "header_hash": {"type": "string", "description": "Block header hash in hex format", "required": True}
+        "header_hash": {"type": "string", "description": "64-character hex string of the block header hash", "required": True}
     },
-    "returns": {"type": "object", "description": "Full block data or null if not found"}
+    "returns": {"type": "object", "description": "Complete block object with header, transactions, proofs, and metadata, or null if block not found"}
 })
 async def get_block(pool: "ClientPool", params: dict[str, Any]) -> Any:
     """Get a block by its header hash."""
@@ -52,9 +52,9 @@ async def get_block(pool: "ClientPool", params: dict[str, Any]) -> Any:
 
 
 @mcp_tool("full_node", "get_network_info", schema={
-    "description": "Get network information and connection status",
+    "description": "Get detailed network information including peer connections, network space, difficulty adjustments, and node synchronization status. Critical for network health monitoring.",
     "parameters": {},
-    "returns": {"type": "object", "description": "Network information including connections and sync status"}
+    "returns": {"type": "object", "description": "Network status with peer count, connection details, network space estimates, and sync information"}
 })
 async def get_network_info(pool: "ClientPool", params: dict[str, Any]) -> Any:
     """Get network information and connection status."""
