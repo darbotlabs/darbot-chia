@@ -83,10 +83,7 @@ def wrap_http_handler(
         except Exception as e:
             tb = traceback.format_exc()
             log.warning(f"Error while handling message: {tb}")
-            if len(e.args) > 0:
-                res_object = {"success": False, "error": f"{e.args[0]}", "traceback": f"{tb}"}
-            else:
-                res_object = {"success": False, "error": f"{e}"}
+            res_object = {"success": False, "error": "An internal error has occurred."}
 
         return obj_to_response(res_object)
 
