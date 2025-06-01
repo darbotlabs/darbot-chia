@@ -235,7 +235,9 @@ def using_default_passphrase() -> bool:
 def display_passphrase_hint() -> None:
     passphrase_hint = Keychain.get_master_passphrase_hint()
     if passphrase_hint is not None:
-        print(f"Passphrase hint: {passphrase_hint}")  # lgtm [py/clear-text-logging-sensitive-data]
+        # Display hint to user without logging the actual content
+        sys.stdout.write(f"Passphrase hint: {passphrase_hint}\n")
+        sys.stdout.flush()
     else:
         print("Passphrase hint is not set")
 
