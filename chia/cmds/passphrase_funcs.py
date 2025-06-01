@@ -67,7 +67,7 @@ def prompt_to_save_passphrase() -> bool:
             if warning is not None:
                 colorama.init()
 
-                print(warning)
+                print(warning)  # lgtm [py/clear-text-logging-sensitive-data]
             save = click.confirm(f"Would you like to save your passphrase to the {location}?", default=None)
 
     except Exception as e:
