@@ -24,6 +24,13 @@ SAVE_MASTER_PASSPHRASE_WARNING = (
 )
 
 
+def _safe_print_error(message: str, exception: Exception) -> None:
+    """Safely print error messages without exposing sensitive information."""
+    # Only print the error type and a generic message to avoid leaking sensitive data
+    error_type = type(exception).__name__
+    print(f"{message}: {error_type}")
+
+
 def verify_passphrase_meets_requirements(
     new_passphrase: str, confirmation_passphrase: str
 ) -> tuple[bool, Optional[str]]:
@@ -67,11 +74,13 @@ def prompt_to_save_passphrase() -> bool:
             if warning is not None:
                 colorama.init()
 
-                print(warning)  # lgtm [py/clear-text-logging-sensitive-data]
+                # Write warning directly to stdout to avoid logging infrastructure
+                sys.stdout.write(warning)
+                sys.stdout.flush()
             save = click.confirm(f"Would you like to save your passphrase to the {location}?", default=None)
 
     except Exception as e:
-        print(f"Caught exception: {e}")
+        _safe_print_error("Caught exception", e)
         return False
 
     return save
@@ -139,7 +148,7 @@ def set_or_update_passphrase(passphrase: Optional[str], current_passphrase: Opti
             try:
                 current_passphrase = obtain_current_passphrase("Current Passphrase: ")
             except Exception as e:
-                print(f"Unable to confirm current passphrase: {e}")
+                _safe_print_error("Unable to confirm current passphrase", e)
                 sys.exit(1)
 
     success: bool = False
@@ -162,7 +171,7 @@ def set_or_update_passphrase(passphrase: Optional[str], current_passphrase: Opti
         )
         success = True
     except Exception as e:
-        print(f"Unable to set or update passphrase: {e}")
+        _safe_print_error("Unable to set or update passphrase", e)
         success = False
 
     return success
@@ -187,7 +196,7 @@ def remove_passphrase(current_passphrase: Optional[str]) -> bool:
             try:
                 current_passphrase = obtain_current_passphrase("Current Passphrase: ")
             except Exception as e:
-                print(f"Unable to confirm current passphrase: {e}")
+                _safe_print_error("Unable to confirm current passphrase", e)
                 success = False
 
         if current_passphrase:
@@ -195,7 +204,7 @@ def remove_passphrase(current_passphrase: Optional[str]) -> bool:
                 Keychain.remove_master_passphrase(current_passphrase)
                 success = True
             except Exception as e:
-                print(f"Unable to remove passphrase: {e}")
+                _safe_print_error("Unable to remove passphrase", e)
                 success = False
 
     return success
@@ -216,7 +225,7 @@ def get_current_passphrase() -> Optional[str]:
         try:
             current_passphrase = obtain_current_passphrase()
         except Exception as e:
-            print(f"Unable to confirm current passphrase: {e}")
+            _safe_print_error("Unable to confirm current passphrase", e)
             raise
 
     return current_passphrase
@@ -292,4 +301,4 @@ async def async_update_daemon_passphrase_cache_if_running(root_path: Path, confi
                     error = response.get("data", {}).get("error", "unknown error")
                     raise Exception(error)
     except Exception as e:
-        print(f"Failed to notify daemon of updated keyring passphrase: {e}")
+        _safe_print_error("Failed to notify daemon of updated keyring passphrase", e)

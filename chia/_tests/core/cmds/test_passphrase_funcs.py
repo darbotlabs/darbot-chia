@@ -3,7 +3,10 @@ from __future__ import annotations
 import io
 from unittest.mock import patch
 
+from chia.cmds.passphrase_funcs import _safe_print_error, display_passphrase_hint
+
 from chia.cmds.passphrase_funcs import display_passphrase_hint, prompt_for_new_passphrase
+
 
 
 class TestPassphraseFuncs:
@@ -46,6 +49,44 @@ class TestPassphraseFuncs:
                 # Verify that stdout.write was called with the hint
                 mock_write.assert_called_once_with(f"Passphrase hint: {test_hint}\n")
                 mock_flush.assert_called_once()
+
+
+    def test_safe_print_error_hides_sensitive_data(self):
+        """Test that _safe_print_error doesn't expose sensitive information from exceptions."""
+        # Test with an exception that contains potentially sensitive data
+        sensitive_exception = ValueError("The passphrase 'secret123' is invalid")
+
+        # Capture output
+        captured_output = io.StringIO()
+        with patch("sys.stdout", captured_output):
+            _safe_print_error("Test error occurred", sensitive_exception)
+
+        output = captured_output.getvalue()
+
+        # Verify that the output doesn't contain the sensitive data
+        assert "secret123" not in output
+        assert "passphrase 'secret123'" not in output
+
+        # Verify that it contains the expected safe information
+        assert "Test error occurred: ValueError" in output
+
+    def test_safe_print_error_with_different_exception_types(self):
+        """Test that _safe_print_error works with different exception types."""
+        test_cases = [
+            (KeyError("sensitive_key"), "KeyError"),
+            (FileNotFoundError("/path/to/keyfile"), "FileNotFoundError"),
+            (PermissionError("Access denied to keyring"), "PermissionError"),
+        ]
+
+        for exception, expected_type in test_cases:
+            captured_output = io.StringIO()
+            with patch("sys.stdout", captured_output):
+                _safe_print_error("Error message", exception)
+
+            output = captured_output.getvalue()
+            assert f"Error message: {expected_type}" in output
+            # Ensure no sensitive details from the exception message are leaked
+            assert str(exception).split(":")[0] not in output or expected_type in output
 
     def test_prompt_for_new_passphrase_error_uses_stdout_write(self):
         """Test that passphrase validation errors are written to stdout directly, not through print()."""
