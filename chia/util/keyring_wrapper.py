@@ -68,7 +68,8 @@ MAX_RETRIES = 3
 
 def prompt_for_passphrase(prompt: str) -> str:
     if sys.platform == "win32" or sys.platform == "cygwin":
-        print(prompt, end="", flush=True)
+        sys.stderr.write(prompt)
+        sys.stderr.flush()
         prompt = ""
     return getpass(prompt)
 
