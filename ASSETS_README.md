@@ -79,22 +79,31 @@ The Darbot Chia brand should use colors that complement the Chia ecosystem:
 ```
 assets/
 ├── vscode-extension/
-│   ├── icon.png (128x128)
-│   ├── activity-bar-icon.svg (16x16)
+│   ├── icon.png (128x128) - from leaf_128.png
+│   ├── activity-bar-icon.png (16x16) - from leaf_16.png
 │   └── status/
-│       ├── connected.svg (16x16)
-│       ├── disconnected.svg (16x16)
-│       └── syncing.svg (16x16)
+│       ├── connected.png (32x32) - from leaf_32_connected.png
+│       ├── disconnected.png (32x32) - from leaf_32_disconnected.png
+│       └── syncing.png (32x32) - from leaf_32_syncing.png
 ├── npm-package/
-│   ├── logo.png (512x512)
-│   └── badge.svg (32x32)
+│   ├── logo.png (512x512) - from leaf_512.png
+│   └── badge.png (32x32) - from leaf_32.png
 ├── marketing/
-│   ├── github-social-preview.png (1280x640)
-│   └── marketplace-banner.png (1376x80)
+│   ├── github-social-preview.png (1280x640) - from social_preview_1280x640.png
+│   └── marketplace-banner.png (1400x560) - from marketplace_banner_1400x560.png
 └── brand/
     ├── style-guide.md
     └── color-palette.png
 ```
+
+## Asset Installation
+
+All required assets have been provided in GitHub comment #2926275214. To install them:
+
+1. Download each asset from the comment
+2. Place them in the corresponding locations shown above
+3. Ensure proper file naming matches the destinations listed
+4. The VSCode extension and NPM package are already configured to reference these asset paths
 
 ## Implementation Notes
 
@@ -128,13 +137,13 @@ Add logo to the README:
 
 ## Current Status
 
-- [ ] VSCode extension icon (128x128)
-- [ ] Activity bar icon (16x16 SVG)
-- [ ] Status indicators (16x16 SVG set)
-- [ ] npm package logo (512x512)
-- [ ] npm package badge (32x32 SVG)
-- [ ] GitHub social preview (1280x640)
-- [ ] Marketplace banner (1376x80)
+- [x] VSCode extension icon (128x128) - `leaf_128.png` provided in comment #2926275214
+- [x] Activity bar icon (16x16) - `leaf_16.png` provided in comment #2926275214
+- [x] Status indicators (32x32 set) - `leaf_32_connected.png`, `leaf_32_disconnected.png`, `leaf_32_syncing.png` provided in comment #2926275214
+- [x] npm package logo (512x512) - `leaf_512.png` provided in comment #2926275214
+- [x] npm package badge (32x32) - `leaf_32.png` provided in comment #2926275214
+- [x] GitHub social preview (1280x640) - `social_preview_1280x640.png` provided in comment #2926275214
+- [x] Marketplace banner (1400x560) - `marketplace_banner_1400x560.png` provided in comment #2926275214
 - [ ] Brand style guide
 
 ## Asset Creation Guidelines
@@ -147,11 +156,22 @@ When creating assets, please ensure:
 4. **Optimization**: Compress images appropriately for web use
 5. **Licensing**: Ensure all assets are properly licensed for open source use
 
-## Placeholder Assets
+## Provided Assets
 
-Until proper branded assets are created, the extension will use:
+All branded assets have been provided in GitHub comment #2926275214 and are ready for integration:
+
+- Professional leaf-based logo design in multiple sizes (16px, 32px, 128px, 512px)
+- Status indicators for connected, disconnected, and syncing states
+- Marketing assets including GitHub social preview and VSCode marketplace banner
+- Consistent design language across all asset sizes
+
+The extension and NPM package have been updated to reference these assets. Once downloaded and placed in the appropriate directories, they will replace the placeholder icons.
+
+## Legacy Placeholder Information
+
+Previously, until proper branded assets were created, the extension used:
 - VS Code's built-in icons (`$(server-process)`, `$(account)`, etc.)
-- Placeholder colors and gradients
+- Placeholder colors and gradients  
 - Generic shapes and symbols
 
-These should be replaced with proper branded assets before the v0.1 production release.
+These placeholders have now been replaced with proper asset references in the configuration files.

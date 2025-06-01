@@ -25,6 +25,7 @@
     "wallet"
   ],
   "main": "./dist/extension.js",
+  "icon": "assets/icon.png",
   "contributes": {
     "commands": [
       {
@@ -92,7 +93,7 @@
         {
           "id": "darbotChia",
           "title": "Darbot Chia",
-          "icon": "$(server-process)"
+          "icon": "assets/activity-bar-icon.png"
         }
       ]
     }

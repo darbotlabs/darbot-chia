@@ -1,4 +1,7 @@
-# @darbotlabs/darbot-chia
+<div align="center">
+  <img src="assets/logo.png" alt="Darbot Chia Logo" width="200">
+  <h1>@darbotlabs/darbot-chia</h1>
+</div>
 
 A TypeScript/JavaScript client library for interacting with Chia blockchain via MCP (Model Context Protocol).
 
