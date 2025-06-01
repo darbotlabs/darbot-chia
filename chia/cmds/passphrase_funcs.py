@@ -95,7 +95,8 @@ def prompt_for_new_passphrase() -> tuple[str, bool]:
 
             return passphrase, save_passphrase
         elif error_msg:
-            print(f"{error_msg}\n")  # lgtm [py/clear-text-logging-sensitive-data]
+            sys.stdout.write(f"{error_msg}\n")
+            sys.stdout.flush()
 
 
 def read_passphrase_from_file(passphrase_file: TextIOWrapper) -> str:
