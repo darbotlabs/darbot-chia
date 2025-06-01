@@ -48,6 +48,8 @@ jobs:
     needs:
       - version
     timeout-minutes: 90
+    # Only run in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     strategy:
       fail-fast: false
       matrix:

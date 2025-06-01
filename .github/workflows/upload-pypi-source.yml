@@ -172,6 +172,8 @@ jobs:
     needs:
       - mypy
       - check
+    # Only run in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     strategy:
       matrix:
         python:

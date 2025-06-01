@@ -13,6 +13,8 @@ jobs:
   start_release:
     name: Starts Sync Test
     runs-on: ubuntu-latest
+    # Only run in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     steps:
       - name: Set Env
         uses: Chia-Network/actions/setjobenv@main

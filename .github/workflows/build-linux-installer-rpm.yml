@@ -50,6 +50,8 @@ jobs:
     container:
       image: chianetwork/rocky8-builder:latest
     timeout-minutes: 40
+    # Only run in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     strategy:
       fail-fast: false
       matrix:
