@@ -32,7 +32,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: Chia-Network/actions/git-ssh-to-https@main
+      - name: Configure git SSH to HTTPS
+        run: |
+          git config --global url."https://github.com/".insteadOf git@github.com:
+          git config --global url."https://".insteadOf git://
 
       - name: Check tag type
         id: tag-type
