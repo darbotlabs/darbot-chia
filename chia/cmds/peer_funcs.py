@@ -15,14 +15,14 @@ async def add_node_connection(rpc_client: RpcClient, add_connection: str) -> Non
             ":".join(add_connection.split(":")[:-1]),
             add_connection.split(":")[-1],
         )
-        print(f"Connecting to {ip}, {port}")
+        print(f"Connecting to {_mask_ip_address(ip)}, {port}")
         try:
             result = await rpc_client.open_connection(ip, int(port))
             err = result.get("error")
             if result["success"] is False or err is not None:
                 print(err)
         except Exception:
-            print(f"Failed to connect to {ip}:{port}")
+            print(f"Failed to connect to {_mask_ip_address(ip)}:{port}")
 
 
 async def remove_node_connection(rpc_client: RpcClient, remove_connection: str) -> None:
@@ -42,11 +42,29 @@ async def remove_node_connection(rpc_client: RpcClient, remove_connection: str) 
                     result_txt = f"Failed to disconnect NodeID {remove_connection}"
                 else:
                     result_txt = (
-                        f"NodeID {remove_connection}... {NodeType(con['type']).name} {con['peer_host']} disconnected"
+                        f"NodeID {remove_connection}... {NodeType(con['type']).name} {_mask_ip_address(con['peer_host'])} disconnected"
                     )
             elif result_txt == "":
                 result_txt = f"NodeID {remove_connection}... not found"
     print(result_txt)
+
+
+def _mask_ip_address(ip: str) -> str:
+    """Mask IP address for security, showing only partial information."""
+    if ":" in ip:  # IPv6
+        parts = ip.split(":")
+        if len(parts) >= 4:
+            return f"{parts[0]}:{parts[1]}:***:***"
+        # For short IPv6 addresses like ::1, mask part of it
+        if len(ip) > 8:
+            return ip[:8] + "***"
+        return ip  # Very short IPv6, keep as-is
+    else:  # IPv4
+        parts = ip.split(".")
+        if len(parts) == 4:
+            return f"{parts[0]}.{parts[1]}.***.*"
+        # For malformed IPs or hostnames, mask if long enough
+        return ip[:8] + "***" if len(ip) > 8 else ip
 
 
 async def print_connections(rpc_client: RpcClient, trusted_peers: dict[str, Any], trusted_cidrs: list[str]) -> None:
@@ -67,6 +85,8 @@ async def print_connections(rpc_client: RpcClient, trusted_peers: dict[str, Any]
         host = con["peer_host"]
         # Strip IPv6 brackets
         host = host.strip("[]")
+        # Mask IP address for security
+        masked_host = _mask_ip_address(host)
 
         trusted: bool = is_trusted_peer(host, con["node_id"], trusted_peers, trusted_cidrs, False)
         # Nodetype length is 9 because INTRODUCER will be deprecated
@@ -80,7 +100,7 @@ async def print_connections(rpc_client: RpcClient, trusted_peers: dict[str, Any]
                     connection_peak_hash = connection_peak_hash[2:]
                 connection_peak_hash = f"{connection_peak_hash[:8]}..."
             con_str = (
-                f"{NodeType(con['type']).name:9} {host:39} "
+                f"{NodeType(con['type']).name:9} {masked_host:39} "
                 f"{con['peer_port']:5}/{con['peer_server_port']:<5}"
                 f" {con['node_id'].hex()[:8]}... "
                 f"{last_connect}  "
@@ -96,7 +116,7 @@ async def print_connections(rpc_client: RpcClient, trusted_peers: dict[str, Any]
                 con_str += f"    -Trusted: {trusted}"
         else:
             con_str = (
-                f"{NodeType(con['type']).name:9} {host:39} "
+                f"{NodeType(con['type']).name:9} {masked_host:39} "
                 f"{con['peer_port']:5}/{con['peer_server_port']:<5}"
                 f" {con['node_id'].hex()[:8]}... "
                 f"{last_connect}  "
