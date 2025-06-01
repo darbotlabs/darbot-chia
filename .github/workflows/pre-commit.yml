@@ -53,9 +53,14 @@ jobs:
 
     steps:
       - name: Clean workspace
-        uses: Chia-Network/actions/clean-workspace@main
+        run: |
+          echo "Cleaning workspace..."
+          rm -rf ./* 2>/dev/null || true
+          rm -rf ./.* 2>/dev/null || true
 
-      - uses: Chia-Network/actions/git-mark-workspace-safe@main
+      - name: Mark workspace as safe
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: disable git autocrlf
         run: |
@@ -63,7 +68,8 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - uses: Chia-Network/actions/setup-python@main
+      - name: Setup Python environment
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python.major_dot_minor }}
 
@@ -72,7 +78,17 @@ jobs:
           python-version: ${{ matrix.python.major_dot_minor }}
           development: true
 
-      - uses: chia-network/actions/activate-venv@main
+      - name: Activate virtual environment
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            source venv/Scripts/activate
+            echo "PATH=$PATH" >> $GITHUB_ENV
+            echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+          else
+            source venv/bin/activate
+            echo "PATH=$PATH" >> $GITHUB_ENV
+            echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+          fi
 
       - env:
           CHIA_MANAGE_CLVM_CHECK_USE_CACHE: "false"

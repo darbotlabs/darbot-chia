@@ -19,6 +19,8 @@ jobs:
   trigger:
     name: Trigger building a new `main` tag for the chia-docker image
     runs-on: ubuntu-latest
+    # Only run in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     steps:
       - name: Trigger docker main workflow via github-glue
         uses: Chia-Network/actions/github/glue@main

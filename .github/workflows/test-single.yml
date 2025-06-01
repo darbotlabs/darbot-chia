@@ -139,12 +139,12 @@ jobs:
           fetch-depth: 0
 
       - name: Set Env
-        uses: Chia-Network/actions/setjobenv@main
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "Setting up environment variables..."
+          echo "GH_TOKEN=${{ secrets.GITHUB_TOKEN }}" >> $GITHUB_ENV
 
       - name: Setup Python environment
-        uses: Chia-Network/actions/setup-python@main
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python.action }}
 
@@ -167,9 +167,15 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
-      - uses: chia-network/actions/cache-pip@main
+      - name: Cache pip dependencies
+        uses: actions/cache@v3
         with:
-          mode: poetry
+          path: |
+            ~/.cache/pip
+            ~/.cache/pypoetry
+          key: ${{ runner.os }}-python-${{ matrix.python.action }}-pip-${{ hashFiles('**/poetry.lock', '**/pyproject.toml') }}
+          restore-keys: |
+            ${{ runner.os }}-python-${{ matrix.python.action }}-pip-
 
       - name: Cache test blocks and plots
         if: matrix.configuration.checkout_blocks_and_plots
@@ -200,7 +206,17 @@ jobs:
           editable: false
           legacy_keyring: ${{ matrix.configuration.legacy_keyring_required }}
 
-      - uses: chia-network/actions/activate-venv@main
+      - name: Activate virtual environment
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            source venv/Scripts/activate
+            echo "PATH=$PATH" >> $GITHUB_ENV
+            echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+          else
+            source venv/bin/activate
+            echo "PATH=$PATH" >> $GITHUB_ENV
+            echo "VIRTUAL_ENV=$VIRTUAL_ENV" >> $GITHUB_ENV
+          fi
 
       - name: Install timelord
         if: matrix.configuration.install_timelord
