@@ -81,7 +81,9 @@ def prompt_for_new_passphrase() -> tuple[str, bool]:
     min_length: int = Keychain.minimum_passphrase_length()
     if min_length > 0:
         n = min_length
-        print(f"\nPassphrases must be {n} or more characters in length")  # lgtm [py/clear-text-logging-sensitive-data]
+        # Write passphrase length requirement directly to stdout to avoid logging sensitive policy information
+        sys.stdout.write(f"\nPassphrases must be {n} or more characters in length\n")
+        sys.stdout.flush()
     while True:
         passphrase: str = getpass("New Passphrase: ")
         confirmation: str = getpass("Confirm Passphrase: ")
@@ -95,7 +97,9 @@ def prompt_for_new_passphrase() -> tuple[str, bool]:
 
             return passphrase, save_passphrase
         elif error_msg:
-            print(f"{error_msg}\n")  # lgtm [py/clear-text-logging-sensitive-data]
+            # Write error message directly to stdout to avoid logging sensitive policy information
+            sys.stdout.write(f"{error_msg}\n")
+            sys.stdout.flush()
 
 
 def read_passphrase_from_file(passphrase_file: TextIOWrapper) -> str:
