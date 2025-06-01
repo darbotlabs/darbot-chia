@@ -25,8 +25,16 @@ def dict_to_json_str(o: Any) -> str:
     """
     Converts a python object into json.
     """
-    json_str = json.dumps(o, cls=EnhancedJSONEncoder, sort_keys=True)
-    return json_str
+    try:
+        json_str = json.dumps(o, cls=EnhancedJSONEncoder, sort_keys=True)
+        return json_str
+    except TypeError as e:
+        # Sanitize error message to avoid exposing sensitive class names
+        original_msg = str(e)
+        if "is not JSON serializable" in original_msg:
+            raise TypeError("Object is not JSON serializable") from e
+        # For other TypeError messages, still sanitize but preserve more context
+        raise TypeError("JSON serialization error") from e
 
 
 def obj_to_response(o: Any) -> web.Response:
