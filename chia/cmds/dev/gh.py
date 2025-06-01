@@ -109,7 +109,7 @@ def gh_group() -> None:
     """,
 )
 class TestCMD:
-    workflow_id: ClassVar[str] = "test.yml"
+    workflow_id: ClassVar[str] = "codeql-analysis.yml"  # Note: test.yml removed, only CodeQL workflow remains
     owner: str = option("-w", "--owner", help="Owner of the repo", type=str, default="Chia-Network")
     repository: str = option("-r", "--repository", help="Repository name", type=str, default="chia-blockchain")
     ref: Optional[str] = option(
@@ -151,7 +151,7 @@ class TestCMD:
                     f"actor={username}",
                 ]
             )
-            run_url = f"https://github.com/Chia-Network/chia-blockchain/actions/workflows/test.yml?query={urllib.parse.quote(query)}"
+            run_url = f"https://github.com/Chia-Network/chia-blockchain/actions/workflows/codeql-analysis.yml?query={urllib.parse.quote(query)}"
             report(f"waiting a few seconds to load: {run_url}")
             await anyio.sleep(10)
         else:
