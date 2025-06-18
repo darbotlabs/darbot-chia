@@ -10,11 +10,6 @@ updates:
       day: "tuesday"
     open-pull-requests-limit: 10
     rebase-strategy: auto
-    labels:
-      - dependencies
-      - go
-      - "Changed"
-    reviewers: ["cmmarslender", "Starttoaster"]
     groups:
       global:
         patterns:
@@ -27,11 +22,6 @@ updates:
       day: "tuesday"
     open-pull-requests-limit: 10
     rebase-strategy: auto
-    labels:
-      - dependencies
-      - python
-      - "Changed"
-    reviewers: ["emlowe", "altendky"]
 
   - package-ecosystem: "github-actions"
     directories: ["/", ".github/actions/*"]
@@ -40,11 +30,6 @@ updates:
       day: "tuesday"
     open-pull-requests-limit: 10
     rebase-strategy: auto
-    labels:
-      - dependencies
-      - github_actions
-      - "Changed"
-    reviewers: ["cmmarslender", "altendky"]
 
   - package-ecosystem: "npm"
     directory: /
@@ -53,11 +38,6 @@ updates:
       day: "tuesday"
     open-pull-requests-limit: 10
     rebase-strategy: auto
-    labels:
-      - dependencies
-      - javascript
-      - "Changed"
-    reviewers: ["cmmarslender", "ChiaMineJP"]
 
   - package-ecosystem: cargo
     directory: /
@@ -66,10 +46,6 @@ updates:
       day: "tuesday"
     open-pull-requests-limit: 10
     rebase-strategy: auto
-    labels:
-      - dependencies
-      - rust
-      - "Changed"
 
   - package-ecosystem: swift
     directory: /
