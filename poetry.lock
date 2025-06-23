@@ -1248,15 +1248,15 @@ test-randomorder = ["pytest-randomly"]
 
 [[package]]
 name = "diff-cover"
-version = "9.3.2"
+version = "9.4.0"
 description = "Run coverage and linting reports on diffs"
 optional = true
 python-versions = ">=3.9"
 groups = ["main"]
 markers = "extra == \"dev\""
 files = [
-    {file = "diff_cover-9.3.2-py3-none-any.whl", hash = "sha256:d922e464056bfedc43d2372495be600c47d100499546853ea8eb0c5e3af28f9f"},
-    {file = "diff_cover-9.3.2.tar.gz", hash = "sha256:2a99239fb8968650da47968a834607b6b797143e5d0405e24c45a71be590755b"},
+    {file = "diff_cover-9.4.0-py3-none-any.whl", hash = "sha256:61b5c7f14925e9e357c0421dc27a062973b2b9f540a1e1327837a496653afd4a"},
+    {file = "diff_cover-9.4.0.tar.gz", hash = "sha256:ee54ff718eb4a970ef29fdfd23539ee1cecec36f0c29b918d6ddf60b9baa4b8a"},
 ]
 
 [package.dependencies]
