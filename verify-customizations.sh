@@ -5,11 +5,11 @@ echo "🔍 Checking darbot-chia customizations..."
 
 # Check for fork restrictions in workflows
 echo "📋 Checking GitHub Actions workflow restrictions..."
-workflow_restrictions=$(grep -l "github.repository == 'Chia-Network/chia-blockchain'" .github/workflows/build-*.yml | wc -l)
-if [ "$workflow_restrictions" -eq 4 ]; then
-    echo "✅ Fork restrictions present in all 4 build workflows"
+fork_restricted_workflows=$(grep -l "github.repository == 'Chia-Network/chia-blockchain'" .github/workflows/*.yml | wc -l)
+if [ "$fork_restricted_workflows" -ge 16 ]; then
+    echo "✅ Fork restrictions present in $fork_restricted_workflows workflows (comprehensive audit completed)"
 else
-    echo "❌ Missing fork restrictions in build workflows (found: $workflow_restrictions/4)"
+    echo "❌ Insufficient fork restrictions - expected 16+, found: $fork_restricted_workflows"
 fi
 
 # Check for security fix
