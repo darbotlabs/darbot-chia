@@ -21,6 +21,8 @@ jobs:
     name: identify version
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # Only run version workflow in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     outputs:
       chia-dev-version: ${{ steps.version-number.outputs.chia-dev-version }}
       chia-installer-version: ${{ steps.version-number.outputs.chia-installer-version }}

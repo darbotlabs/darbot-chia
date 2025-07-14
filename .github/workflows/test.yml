@@ -109,7 +109,7 @@ jobs:
       matrix_mode: ${{ steps.configure.outputs.matrix_mode }}
 
   macos-intel:
-    if: github.event_name != 'workflow_dispatch' || inputs.run-macos-intel
+    if: (github.event_name != 'workflow_dispatch' || inputs.run-macos-intel) && github.repository == 'Chia-Network/chia-blockchain'
     uses: ./.github/workflows/test-single.yml
     needs: configure
     with:
@@ -124,7 +124,7 @@ jobs:
       arch: intel
       arch-emoji: 🌀
   macos-arm:
-    if: github.event_name != 'workflow_dispatch' || inputs.run-macos-arm
+    if: (github.event_name != 'workflow_dispatch' || inputs.run-macos-arm) && github.repository == 'Chia-Network/chia-blockchain'
     uses: ./.github/workflows/test-single.yml
     needs: configure
     with:
@@ -156,7 +156,7 @@ jobs:
       arch-emoji: 🌀
       collect-junit: false
   windows:
-    if: github.event_name != 'workflow_dispatch' || inputs.run-windows
+    if: (github.event_name != 'workflow_dispatch' || inputs.run-windows) && github.repository == 'Chia-Network/chia-blockchain'
     uses: ./.github/workflows/test-single.yml
     needs: configure
     with:

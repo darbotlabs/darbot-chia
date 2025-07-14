@@ -24,6 +24,8 @@ jobs:
   test_scripts:
     name: Native ${{ matrix.os.emoji }} ${{ matrix.arch.emoji }} ${{ matrix.development.name }} - ${{ matrix.editable.name }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
+    # Only run install script tests in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     strategy:
       fail-fast: false
       matrix:

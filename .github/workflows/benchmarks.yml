@@ -31,6 +31,8 @@ jobs:
     name: Setup
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # Only run benchmarks in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     outputs:
       repeats: ${{ steps.repeats.outputs.repeats }}
       timeout: ${{ steps.timeout.outputs.timeout }}

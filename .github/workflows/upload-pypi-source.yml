@@ -29,6 +29,8 @@ jobs:
     name: ${{ matrix.os.emoji }} ${{ matrix.arch.emoji }} ${{ matrix.check.name }} - ${{ matrix.os.name }} ${{ matrix.python.major_dot_minor }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
     timeout-minutes: 20
+    # Only run mypy/upload workflow in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     strategy:
       fail-fast: false
       matrix:
@@ -104,6 +106,8 @@ jobs:
     name: ${{ matrix.os.emoji }} ${{ matrix.check.name }} - ${{ matrix.os.name }} ${{ matrix.arch.name }} ${{ matrix.python.major_dot_minor }}
     runs-on: ${{ matrix.os.runs-on[matrix.arch.matrix] }}
     timeout-minutes: 20
+    # Only run check workflow in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     strategy:
       fail-fast: false
       matrix:
@@ -169,6 +173,8 @@ jobs:
     name: Lint and Upload source distribution
     runs-on: ${{ matrix.os }}
     timeout-minutes: 30
+    # Only run upload workflow in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     needs:
       - mypy
       - check

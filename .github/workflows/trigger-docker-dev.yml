@@ -23,6 +23,8 @@ jobs:
   trigger:
     name: Trigger building a new dev tag for the chia-docker image
     runs-on: ubuntu-latest
+    # Only run docker triggers in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     steps:
       - name: Test for secrets access
         id: check_secrets
