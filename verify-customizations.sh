@@ -45,6 +45,7 @@ if [ -f "FORK_SYNC_GUIDE.md" ]; then
     echo "✅ Fork sync guide is present"
 else
     echo "❌ Fork sync guide is missing"
+    failure_detected=1
 fi
 
 echo ""
@@ -52,3 +53,7 @@ echo "🎯 Summary:"
 echo "   This script verifies that key darbot customizations are preserved."
 echo "   Run this after each upstream sync to ensure nothing was lost."
 echo ""
+if [ "$failure_detected" -eq 1 ]; then
+    echo "❌ One or more checks failed."
+    exit 1
+fi
