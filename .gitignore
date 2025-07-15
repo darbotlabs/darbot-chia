@@ -309,3 +309,25 @@ tags
 # Ignore the binaries that are pulled for the installer
 /bladebit/
 /madmax/
+
+# Additional exclusions for fork maintenance
+recovery-branch/
+*.tmp
+*.temp
+.vscode/
+.idea/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.tox/
+.coverage*
+htmlcov/
+.pytest_cache/
+
+# Node modules and frontend builds
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*

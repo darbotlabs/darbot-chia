@@ -47,8 +47,10 @@ jobs:
     runs-on: ${{ matrix.os.runs-on }}
     needs:
       - version
-    container: chianetwork/ubuntu-22.04-builder:latest
+    container: chianetwork/ubuntu-20.04-builder:latest
     timeout-minutes: 120
+    # Only run in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     strategy:
       fail-fast: false
       matrix:

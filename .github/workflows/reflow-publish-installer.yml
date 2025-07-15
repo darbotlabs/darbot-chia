@@ -30,6 +30,8 @@ jobs:
     name: Publish ${{ matrix.arch.name }} ${{ matrix.mode.name }} ${{ matrix.os.file-type.name }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # Only run publish workflow in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     strategy:
       fail-fast: false
       matrix: ${{ fromJson(inputs.configuration) }}

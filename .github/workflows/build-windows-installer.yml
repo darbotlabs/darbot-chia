@@ -44,10 +44,12 @@ jobs:
 
   build:
     name: Build EXE
-    runs-on: [windows-2022]
+    runs-on: [windows-2019]
     needs:
       - version
     timeout-minutes: 65
+    # Only run in official Chia-Network repository
+    if: github.repository == 'Chia-Network/chia-blockchain'
     strategy:
       fail-fast: false
       matrix:
