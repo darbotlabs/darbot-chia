@@ -65,8 +65,8 @@ async def main():
     logger = logging.getLogger(__name__)
     
     # Setup signal handlers
-    signal.signal(signal.SIGINT, signal_handler)
-    signal.signal(signal.SIGTERM, signal_handler)
+    signal.signal(signal.SIGINT, sync_signal_handler)
+    signal.signal(signal.SIGTERM, sync_signal_handler)
     
     try:
         # Create and start the MCP server
