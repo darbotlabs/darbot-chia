@@ -1,29 +1,83 @@
-# Chia MCP Server
+# Chia MCP Server - Enhanced Hierarchical Architecture
 
-This repository contains a Model Context Protocol (MCP) server implementation for the Chia blockchain, enabling AI models to interact with Chia blockchain data and operations.
+This repository contains an enhanced Model Context Protocol (MCP) server implementation for the Chia blockchain, featuring a hierarchical plugin-based architecture that makes Chia blockchain functionality easily accessible to AI models like GitHub Copilot.
+
+## 🚀 What's New in v2.0
+
+### Major Improvements Over Original Implementation
+
+- **🏗️ Hierarchical Tool Organization**: Tools are organized in logical namespaces (wallet.*, blockchain.*, farming.*)
+- **🔌 Plugin-Based Architecture**: Extensible system that allows easy addition of new functionality
+- **📈 480% More Tools**: Expanded from 5 basic tools to 24 comprehensive tools
+- **🎯 Advanced Chia Features**: Full support for farming, plotting, blockchain analysis, and wallet operations
+- **📋 Rich Categorization**: 11 tool categories with icons and descriptions for better IDE integration
+- **📚 Organized Resources**: 35 hierarchically organized resources (up from 3)
+- **🔍 Enhanced Schemas**: Detailed validation, examples, and parameter descriptions
+
+### Plugin System
+
+The server now features three main plugins:
+
+#### 🔷 Wallet Plugin (6 tools)
+- `wallet.balance` - Enhanced balance with coin details
+- `wallet.coins` - Detailed coin information and filtering
+- `wallet.transactions` - Advanced transaction history with sorting
+- `wallet.transaction_detail` - Individual transaction analysis
+- `wallet.send` - Advanced transaction sending with memos
+- `wallet.create_backup` - Wallet backup functionality
+
+#### 🔷 Blockchain Plugin (9 tools)
+- `blockchain.status` - Comprehensive network status
+- `blockchain.peers` - Peer connection analysis
+- `blockchain.block_by_height` - Block information by height
+- `blockchain.block_by_hash` - Block information by hash
+- `blockchain.block_range` - Batch block analysis
+- `blockchain.network_space` - Network space calculations
+- `blockchain.difficulty` - Difficulty and adjustment info
+- `blockchain.mempool_info` - Mempool statistics
+- `blockchain.fee_estimate` - Smart fee estimation
+
+#### 🔷 Farming Plugin (9 tools)
+- `farming.plot_count` - Plot statistics and grouping
+- `farming.plot_details` - Individual plot information
+- `farming.plot_health` - Plot health diagnostics
+- `farming.harvester_status` - Harvester performance metrics
+- `farming.signage_points` - Signage point analysis
+- `farming.farming_rewards` - Reward tracking and history
+- `farming.estimated_time_to_win` - Statistical projections
+- `farming.farming_efficiency` - Performance optimization
+- `farming.farm_summary` - Comprehensive farming dashboard
 
 ## What is MCP?
 
-The Model Context Protocol (MCP) is a protocol for connecting AI models to external data sources and tools. This implementation provides AI models with access to:
+The Model Context Protocol (MCP) is a protocol for connecting AI models to external data sources and tools. This enhanced implementation provides AI models with comprehensive access to:
 
-- Chia wallet operations (balance, transactions, sending)
-- Blockchain status and sync information
-- Transaction history and analysis
-- Wallet management capabilities
+- **Advanced Wallet Operations** (balance, transactions, sending, backup)
+- **Blockchain Analysis** (status, blocks, network metrics, fees)
+- **Farming Management** (plots, harvesting, rewards, optimization)
+- **Real-time Data** via hierarchical resource URIs
 
 ## Features
 
-### MCP Tools
-- `get_wallet_balance` - Get balance of any Chia wallet
-- `get_transactions` - Get transaction history with pagination
-- `send_transaction` - Send XCH or other tokens to addresses
-- `get_wallets` - List all available wallets
-- `get_sync_status` - Check blockchain synchronization status
+### 🎯 Hierarchical Tool Organization
+- **Namespaced Tools**: `wallet.*`, `blockchain.*`, `farming.*`
+- **Logical Grouping**: Related functionality grouped together
+- **Easy Discovery**: AI models can easily find relevant tools
 
-### MCP Resources
-- `chia://blockchain/status` - Real-time blockchain information
-- `chia://wallet/balance` - Current wallet balance data
-- `chia://wallet/transactions` - Recent transaction history
+### 🔧 Plugin System
+- **Extensible Architecture**: Add new plugins without modifying core code
+- **Category Support**: Tools organized in categories with icons
+- **Plugin Discovery**: Built-in plugin information and management
+
+### 📊 Enhanced Schemas
+- **Rich Validation**: Parameter constraints and validation
+- **Examples**: Usage examples for each tool
+- **Documentation**: Comprehensive parameter descriptions
+
+### 📚 Resource Hierarchy
+- **Organized URIs**: `chia://wallet/1/balance`, `chia://blockchain/network/space`
+- **Real-time Data**: Live blockchain and farming metrics
+- **Hierarchical Access**: Drill down from summaries to details
 
 ## Installation
 
