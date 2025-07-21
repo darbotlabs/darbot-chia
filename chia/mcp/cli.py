@@ -67,6 +67,10 @@ async def main():
     # Setup signal handlers
     signal.signal(signal.SIGINT, sync_signal_handler)
     signal.signal(signal.SIGTERM, sync_signal_handler)
+
+def sync_signal_handler(signum, frame):
+    """Synchronous signal handler that wraps the async signal handler."""
+    asyncio.run(signal_handler(signum, frame))
     
     try:
         # Create and start the MCP server
