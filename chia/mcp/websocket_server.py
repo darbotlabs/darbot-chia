@@ -85,6 +85,12 @@ class MCPWebSocketServer:
     
     async def send_capabilities(self, websocket: WebSocketServerProtocol) -> None:
         """Send server capabilities to the client."""
+        # Get plugin information to include in capabilities
+        plugin_info = self.mcp_server.plugin_manager.get_plugin_info()
+        all_tools = self.mcp_server.plugin_manager.get_all_tools()
+        all_resources = self.mcp_server.plugin_manager.get_all_resources()
+        categories = self.mcp_server.plugin_manager.get_all_categories()
+        
         capabilities = {
             "jsonrpc": "2.0",
             "method": "initialize",
@@ -97,16 +103,34 @@ class MCPWebSocketServer:
                     "resources": {
                         "subscribe": True,
                         "listChanged": True
+                    },
+                    "experimental": {
+                        "plugins": True,
+                        "hierarchical_tools": True,
+                        "categories": True
                     }
                 },
                 "serverInfo": {
                     "name": "chia-mcp-server", 
-                    "version": "1.0.0"
+                    "version": "2.0.0",
+                    "description": "Hierarchical Chia blockchain MCP server with advanced plugin system",
+                    "plugins": len(plugin_info),
+                    "tools": len(all_tools),
+                    "resources": len(all_resources),
+                    "categories": len(categories),
+                    "plugin_summary": [
+                        {
+                            "name": info["name"],
+                            "tools": info["tools_count"],
+                            "resources": info["resources_count"]
+                        }
+                        for info in plugin_info
+                    ]
                 }
             }
         }
         
-        await websocket.send(json.dumps(capabilities))
+        await websocket.send(json.dumps(capabilities, indent=2))
     
     async def send_error(self, websocket: WebSocketServerProtocol, error_message: str) -> None:
         """Send error message to client."""

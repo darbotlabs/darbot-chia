@@ -152,23 +152,62 @@ class PluginManager:
     
     async def execute_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Any:
         """Execute a tool by routing to the appropriate plugin."""
-        if '.' not in tool_name:
-            raise ValueError(f"Tool name must include plugin prefix: {tool_name}")
-        
-        plugin_name, local_tool_name = tool_name.split('.', 1)
-        
-        if plugin_name not in self.plugins:
-            raise ValueError(f"Unknown plugin: {plugin_name}")
-        
-        return await self.plugins[plugin_name].execute_tool(local_tool_name, arguments)
+        try:
+            if '.' not in tool_name:
+                raise ValueError(f"Tool name must include plugin prefix: {tool_name}")
+            
+            plugin_name, local_tool_name = tool_name.split('.', 1)
+            
+            if plugin_name not in self.plugins:
+                available_plugins = list(self.plugins.keys())
+                raise ValueError(f"Unknown plugin: {plugin_name}. Available plugins: {available_plugins}")
+            
+            plugin = self.plugins[plugin_name]
+            
+            # Validate tool exists in plugin
+            plugin_tools = plugin.get_tools()
+            if tool_name not in plugin_tools:
+                available_tools = [name for name in plugin_tools.keys() if name.startswith(f"{plugin_name}.")]
+                raise ValueError(f"Tool '{tool_name}' not found in plugin '{plugin_name}'. Available tools: {available_tools}")
+            
+            # Execute with enhanced error context
+            try:
+                result = await plugin.execute_tool(local_tool_name, arguments)
+                self.logger.debug(f"Successfully executed tool: {tool_name}")
+                return result
+            except Exception as e:
+                self.logger.error(f"Tool execution failed for {tool_name}: {e}")
+                raise ValueError(f"Tool execution failed for {tool_name}: {str(e)}")
+                
+        except Exception as e:
+            self.logger.error(f"Error in tool execution routing: {e}")
+            raise
     
     async def read_resource(self, uri: str) -> Any:
         """Read a resource by routing to the appropriate plugin."""
-        for plugin in self.plugins.values():
-            if uri in plugin.get_resources():
-                return await plugin.read_resource(uri)
-        
-        raise ValueError(f"Unknown resource: {uri}")
+        try:
+            # Find which plugin handles this resource
+            handling_plugin = None
+            for plugin in self.plugins.values():
+                if uri in plugin.get_resources():
+                    handling_plugin = plugin
+                    break
+            
+            if handling_plugin is None:
+                available_resources = list(self.get_all_resources().keys())
+                raise ValueError(f"Unknown resource: {uri}. Available resources: {available_resources[:10]}...")
+            
+            try:
+                result = await handling_plugin.read_resource(uri)
+                self.logger.debug(f"Successfully read resource: {uri}")
+                return result
+            except Exception as e:
+                self.logger.error(f"Resource reading failed for {uri}: {e}")
+                raise ValueError(f"Resource reading failed for {uri}: {str(e)}")
+                
+        except Exception as e:
+            self.logger.error(f"Error in resource reading routing: {e}")
+            raise
     
     def get_plugin_info(self) -> List[Dict[str, Any]]:
         """Get information about all registered plugins."""
