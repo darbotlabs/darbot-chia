@@ -2,7 +2,7 @@
 MCP Server implementation for Chia blockchain integration.
 
 Provides Model Context Protocol server functionality to expose Chia blockchain
-operations and data access to AI models.
+operations and data access to AI models using a hierarchical plugin system.
 """
 
 from __future__ import annotations
@@ -18,6 +18,7 @@ from .protocol import (
     MCPError, ChiaWalletInfo, ChiaTransactionRecord,
     serialize_message, deserialize_message
 )
+from .plugins import PluginManager, WalletPlugin, BlockchainPlugin, FarmingPlugin
 
 from ..rpc.rpc_client import RpcClient
 from ..util.config import load_config
@@ -95,7 +96,7 @@ class MCPServer:
 
 
 class ChiaMCPServer(MCPServer):
-    """MCP server specifically for Chia blockchain integration."""
+    """MCP server specifically for Chia blockchain integration with plugin system."""
     
     def __init__(self, host: str = "localhost", port: int = 8080, chia_rpc_port: int = 9256):
         super().__init__(host, port)
@@ -103,9 +104,11 @@ class ChiaMCPServer(MCPServer):
         self.rpc_client: Optional[RpcClient] = None
         self.config = None
         
-        # Register default Chia tools
-        self._register_chia_tools()
-        self._register_chia_resources()
+        # Initialize plugin manager
+        self.plugin_manager = PluginManager()
+        
+        # Register default Chia plugins
+        self._register_default_plugins()
         
     async def start(self) -> None:
         """Start the Chia MCP server."""
@@ -119,8 +122,16 @@ class ChiaMCPServer(MCPServer):
                 RpcClient.get_client_base_path() + "wallet/"
             )
             
+            # Initialize plugins with RPC client
+            for plugin in self.plugin_manager.plugins.values():
+                plugin.rpc_client = self.rpc_client
+            
+            # Register plugin handlers
+            self._register_plugin_handlers()
+            
             logger.info(f"Chia MCP Server starting on {self.host}:{self.port}")
             logger.info(f"Connected to Chia wallet RPC on port {self.chia_rpc_port}")
+            logger.info(f"Loaded {len(self.plugin_manager.plugins)} plugins: {list(self.plugin_manager.plugins.keys())}")
             
         except Exception as e:
             logger.error(f"Failed to start Chia MCP server: {e}")
@@ -134,136 +145,34 @@ class ChiaMCPServer(MCPServer):
             
         logger.info("Chia MCP Server stopped")
     
-    def _register_chia_tools(self) -> None:
-        """Register default Chia blockchain tools."""
+    def _register_default_plugins(self) -> None:
+        """Register default Chia plugins."""
+        # Register core plugins
+        self.plugin_manager.register_plugin(WalletPlugin())
+        self.plugin_manager.register_plugin(BlockchainPlugin())
+        self.plugin_manager.register_plugin(FarmingPlugin())
         
-        # Wallet balance tool
-        self.add_tool(MCPTool(
-            name="get_wallet_balance",
-            description="Get the balance of a Chia wallet",
-            input_schema={
-                "type": "object",
-                "properties": {
-                    "wallet_id": {
-                        "type": "integer",
-                        "description": "The ID of the wallet to check balance for",
-                        "default": 1
-                    }
-                }
-            }
-        ))
+    def _register_plugin_handlers(self) -> None:
+        """Register MCP handlers that work with the plugin system."""
+        # Override tools and resources with plugin data
+        self.tools = self.plugin_manager.get_all_tools()
+        self.resources = self.plugin_manager.get_all_resources()
         
-        # Transaction history tool
-        self.add_tool(MCPTool(
-            name="get_transactions",
-            description="Get transaction history for a Chia wallet",
-            input_schema={
-                "type": "object",
-                "properties": {
-                    "wallet_id": {
-                        "type": "integer",
-                        "description": "The ID of the wallet to get transactions for",
-                        "default": 1
-                    },
-                    "start": {
-                        "type": "integer",
-                        "description": "Starting index for transactions",
-                        "default": 0
-                    },
-                    "end": {
-                        "type": "integer", 
-                        "description": "Ending index for transactions",
-                        "default": 50
-                    }
-                }
-            }
-        ))
-        
-        # Send transaction tool
-        self.add_tool(MCPTool(
-            name="send_transaction",
-            description="Send XCH or other tokens to another address",
-            input_schema={
-                "type": "object",
-                "properties": {
-                    "wallet_id": {
-                        "type": "integer",
-                        "description": "The ID of the wallet to send from",
-                        "default": 1
-                    },
-                    "amount": {
-                        "type": "integer",
-                        "description": "Amount to send in mojos (1 XCH = 1e12 mojos)"
-                    },
-                    "address": {
-                        "type": "string",
-                        "description": "Destination address"
-                    },
-                    "fee": {
-                        "type": "integer",
-                        "description": "Transaction fee in mojos",
-                        "default": 0
-                    }
-                },
-                "required": ["amount", "address"]
-            }
-        ))
-        
-        # Get wallet info tool
-        self.add_tool(MCPTool(
-            name="get_wallets",
-            description="Get list of all wallets",
-            input_schema={
-                "type": "object",
-                "properties": {}
-            }
-        ))
-        
-        # Sync status tool
-        self.add_tool(MCPTool(
-            name="get_sync_status",
-            description="Get wallet sync status",
-            input_schema={
-                "type": "object",
-                "properties": {}
-            }
-        ))
-        
-        # Register handlers for these tools
-        self.add_handler("tools/call", ChiaToolCallHandler(self))
-        self.add_handler("tools/list", ChiaToolListHandler(self))
-        
-    def _register_chia_resources(self) -> None:
-        """Register default Chia blockchain resources."""
-        
-        self.add_resource(MCPResource(
-            uri="chia://blockchain/status",
-            name="Blockchain Status",
-            description="Current blockchain sync status and information",
-            mime_type="application/json"
-        ))
-        
-        self.add_resource(MCPResource(
-            uri="chia://wallet/balance",
-            name="Wallet Balance",
-            description="Current wallet balance information",
-            mime_type="application/json"
-        ))
-        
-        self.add_resource(MCPResource(
-            uri="chia://wallet/transactions",
-            name="Wallet Transactions", 
-            description="Transaction history for wallets",
-            mime_type="application/json"
-        ))
-        
-        # Register resource handlers
-        self.add_handler("resources/read", ChiaResourceHandler(self))
-        self.add_handler("resources/list", ChiaResourceListHandler(self))
+        # Register enhanced handlers
+        self.add_handler("tools/call", PluginToolCallHandler(self))
+        self.add_handler("tools/list", PluginToolListHandler(self))
+        self.add_handler("resources/read", PluginResourceHandler(self))
+        self.add_handler("resources/list", PluginResourceListHandler(self))
+        self.add_handler("plugins/list", PluginInfoHandler(self))
+        self.add_handler("categories/list", CategoryListHandler(self))
+    
+    def get_plugin_manager(self) -> PluginManager:
+        """Get the plugin manager for external access."""
+        return self.plugin_manager
 
 
-class ChiaToolCallHandler(MCPHandler):
-    """Handler for Chia tool calls."""
+class PluginToolCallHandler(MCPHandler):
+    """Handler for tool calls using the plugin system."""
     
     def __init__(self, server: ChiaMCPServer):
         self.server = server
@@ -287,8 +196,8 @@ class ChiaToolCallHandler(MCPHandler):
                     error={"code": -32601, "message": f"Tool not found: {tool_name}"}
                 )
                 
-            # Execute the tool
-            result = await self._execute_tool(tool_name, arguments)
+            # Execute the tool through plugin manager
+            result = await self.server.plugin_manager.execute_tool(tool_name, arguments)
             
             return MCPResponse(
                 id=request.id,
@@ -304,74 +213,46 @@ class ChiaToolCallHandler(MCPHandler):
     async def handle_notification(self, notification: MCPNotification) -> None:
         """Handle tool call notifications."""
         pass
-        
-    async def _execute_tool(self, tool_name: str, arguments: Dict[str, Any]) -> Any:
-        """Execute a specific Chia tool."""
-        if not self.server.rpc_client:
-            raise Exception("RPC client not initialized")
-            
-        if tool_name == "get_wallet_balance":
-            wallet_id = arguments.get("wallet_id", 1)
-            response = await self.server.rpc_client.fetch("get_wallet_balance", {"wallet_id": wallet_id})
-            return response
-            
-        elif tool_name == "get_transactions":
-            wallet_id = arguments.get("wallet_id", 1)
-            start = arguments.get("start", 0)
-            end = arguments.get("end", 50)
-            response = await self.server.rpc_client.fetch("get_transactions", {
-                "wallet_id": wallet_id,
-                "start": start,
-                "end": end
-            })
-            return response
-            
-        elif tool_name == "send_transaction":
-            wallet_id = arguments.get("wallet_id", 1)
-            amount = arguments["amount"]
-            address = arguments["address"]
-            fee = arguments.get("fee", 0)
-            
-            response = await self.server.rpc_client.fetch("send_transaction", {
-                "wallet_id": wallet_id,
-                "amount": amount,
-                "address": address,
-                "fee": fee
-            })
-            return response
-            
-        elif tool_name == "get_wallets":
-            response = await self.server.rpc_client.fetch("get_wallets", {})
-            return response
-            
-        elif tool_name == "get_sync_status":
-            response = await self.server.rpc_client.fetch("get_sync_status", {})
-            return response
-            
-        else:
-            raise Exception(f"Unknown tool: {tool_name}")
 
 
-class ChiaToolListHandler(MCPHandler):
-    """Handler for listing available tools."""
+class PluginToolListHandler(MCPHandler):
+    """Handler for listing available tools with plugin information."""
     
     def __init__(self, server: ChiaMCPServer):
         self.server = server
         
     async def handle_request(self, request: MCPRequest) -> MCPResponse:
         """Handle tool list requests."""
-        tools_list = [
-            {
+        tools_list = []
+        
+        for tool_name, tool in self.server.tools.items():
+            plugin_name = tool_name.split('.')[0] if '.' in tool_name else "core"
+            
+            tool_info = {
                 "name": tool.name,
                 "description": tool.description,
-                "inputSchema": tool.input_schema
+                "inputSchema": tool.input_schema,
+                "plugin": plugin_name,
+                "category": plugin_name  # Plugin name serves as category
             }
-            for tool in self.server.tools.values()
-        ]
+            tools_list.append(tool_info)
+        
+        # Group tools by plugin for better organization
+        tools_by_plugin = {}
+        for tool_info in tools_list:
+            plugin = tool_info["plugin"]
+            if plugin not in tools_by_plugin:
+                tools_by_plugin[plugin] = []
+            tools_by_plugin[plugin].append(tool_info)
         
         return MCPResponse(
             id=request.id,
-            result={"tools": tools_list}
+            result={
+                "tools": tools_list,
+                "tools_by_plugin": tools_by_plugin,
+                "total_tools": len(tools_list),
+                "plugins": list(tools_by_plugin.keys())
+            }
         )
     
     async def handle_notification(self, notification: MCPNotification) -> None:
@@ -379,8 +260,8 @@ class ChiaToolListHandler(MCPHandler):
         pass
 
 
-class ChiaResourceHandler(MCPHandler):
-    """Handler for reading Chia resources."""
+class PluginResourceHandler(MCPHandler):
+    """Handler for reading resources using the plugin system."""
     
     def __init__(self, server: ChiaMCPServer):
         self.server = server
@@ -403,8 +284,8 @@ class ChiaResourceHandler(MCPHandler):
                     error={"code": -32601, "message": f"Resource not found: {uri}"}
                 )
                 
-            # Read the resource
-            content = await self._read_resource(uri)
+            # Read the resource through plugin manager
+            content = await self.server.plugin_manager.read_resource(uri)
             
             return MCPResponse(
                 id=request.id,
@@ -426,55 +307,109 @@ class ChiaResourceHandler(MCPHandler):
     async def handle_notification(self, notification: MCPNotification) -> None:
         """Handle resource read notifications."""
         pass
-        
-    async def _read_resource(self, uri: str) -> Any:
-        """Read a specific Chia resource."""
-        if not self.server.rpc_client:
-            raise Exception("RPC client not initialized")
-            
-        if uri == "chia://blockchain/status":
-            response = await self.server.rpc_client.fetch("get_sync_status", {})
-            return response
-            
-        elif uri == "chia://wallet/balance":
-            response = await self.server.rpc_client.fetch("get_wallet_balance", {"wallet_id": 1})
-            return response
-            
-        elif uri == "chia://wallet/transactions":
-            response = await self.server.rpc_client.fetch("get_transactions", {
-                "wallet_id": 1,
-                "start": 0,
-                "end": 10
-            })
-            return response
-            
-        else:
-            raise Exception(f"Unknown resource: {uri}")
 
 
-class ChiaResourceListHandler(MCPHandler):
-    """Handler for listing available resources."""
+class PluginResourceListHandler(MCPHandler):
+    """Handler for listing available resources with plugin information."""
     
     def __init__(self, server: ChiaMCPServer):
         self.server = server
         
     async def handle_request(self, request: MCPRequest) -> MCPResponse:
         """Handle resource list requests."""
-        resources_list = [
-            {
+        resources_list = []
+        
+        for uri, resource in self.server.resources.items():
+            # Determine plugin from URI
+            plugin_name = "core"
+            if uri.startswith("chia://"):
+                uri_parts = uri.split("/")
+                if len(uri_parts) > 2:
+                    plugin_name = uri_parts[2]  # e.g., wallet, blockchain, farming
+            
+            resource_info = {
                 "uri": resource.uri,
                 "name": resource.name,
                 "description": resource.description,
-                "mimeType": resource.mime_type
+                "mimeType": resource.mime_type,
+                "plugin": plugin_name
             }
-            for resource in self.server.resources.values()
-        ]
+            resources_list.append(resource_info)
+        
+        # Group resources by plugin
+        resources_by_plugin = {}
+        for resource_info in resources_list:
+            plugin = resource_info["plugin"]
+            if plugin not in resources_by_plugin:
+                resources_by_plugin[plugin] = []
+            resources_by_plugin[plugin].append(resource_info)
         
         return MCPResponse(
             id=request.id,
-            result={"resources": resources_list}
+            result={
+                "resources": resources_list,
+                "resources_by_plugin": resources_by_plugin,
+                "total_resources": len(resources_list),
+                "plugins": list(resources_by_plugin.keys())
+            }
         )
     
     async def handle_notification(self, notification: MCPNotification) -> None:
         """Handle resource list notifications."""
+        pass
+
+
+class PluginInfoHandler(MCPHandler):
+    """Handler for getting plugin information."""
+    
+    def __init__(self, server: ChiaMCPServer):
+        self.server = server
+        
+    async def handle_request(self, request: MCPRequest) -> MCPResponse:
+        """Handle plugin info requests."""
+        plugin_info = self.server.plugin_manager.get_plugin_info()
+        
+        return MCPResponse(
+            id=request.id,
+            result={
+                "plugins": plugin_info,
+                "total_plugins": len(plugin_info)
+            }
+        )
+    
+    async def handle_notification(self, notification: MCPNotification) -> None:
+        """Handle plugin info notifications."""
+        pass
+
+
+class CategoryListHandler(MCPHandler):
+    """Handler for listing tool categories."""
+    
+    def __init__(self, server: ChiaMCPServer):
+        self.server = server
+        
+    async def handle_request(self, request: MCPRequest) -> MCPResponse:
+        """Handle category list requests."""
+        categories = self.server.plugin_manager.get_all_categories()
+        
+        categories_list = []
+        for category_name, category in categories.items():
+            category_info = {
+                "name": category.name,
+                "description": category.description,
+                "icon": category.icon,
+                "tags": category.tags or []
+            }
+            categories_list.append(category_info)
+        
+        return MCPResponse(
+            id=request.id,
+            result={
+                "categories": categories_list,
+                "total_categories": len(categories_list)
+            }
+        )
+    
+    async def handle_notification(self, notification: MCPNotification) -> None:
+        """Handle category list notifications."""
         pass
