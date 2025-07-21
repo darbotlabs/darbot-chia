@@ -224,11 +224,7 @@ async def test_protocol_without_server():
     print("=" * 50)
     
     # Import MCP protocol
-    import sys
-    from pathlib import Path
-    sys.path.insert(0, str(Path(__file__).parent))
-    
-    from chia.mcp.protocol import MCPRequest, MCPResponse, serialize_message, deserialize_message
+    from .protocol import MCPRequest, MCPResponse, serialize_message, deserialize_message
     
     # Test request creation and serialization
     request = MCPRequest(
