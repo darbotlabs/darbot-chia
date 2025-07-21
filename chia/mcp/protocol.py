@@ -87,14 +87,14 @@ class ChiaTransactionRecord:
     confirmed: bool
     sent: int
     spend_bundle: Optional[Dict[str, Any]] = None
-    additions: List[Dict[str, Any]] = None
-    removals: List[Dict[str, Any]] = None
+    additions: Optional[List[Dict[str, Any]]] = None
+    removals: Optional[List[Dict[str, Any]]] = None
     wallet_id: int = 1
-    sent_to: List[str] = None
+    sent_to: Optional[List[str]] = None
     trade_id: Optional[str] = None
     type: int = 1
     name: str = ""
-    memos: Dict[str, Any] = None
+    memos: Optional[Dict[str, Any]] = None
 
 
 class MCPHandler(ABC):
