@@ -3,7 +3,7 @@ from __future__ import annotations
 import io
 import re
 from dataclasses import dataclass, field, fields
-from typing import Any, Callable, ClassVar, Optional, get_type_hints
+from typing import Any, Callable, ClassVar, Optional, Union, get_type_hints
 
 import pytest
 from chia_rs import FullBlock, G1Element, SubEpochChallengeSegment
@@ -372,7 +372,7 @@ def test_not_lists() -> None:
 
 def test_basic_optional() -> None:
     assert is_type_SpecificOptional(Optional[int])
-    assert is_type_SpecificOptional(Optional[Optional[int]])
+    assert is_type_SpecificOptional(Union[None, int])
     assert not is_type_SpecificOptional(list[int])
 
 
@@ -398,8 +398,8 @@ class PostInitTestClassBad(Streamable):
 class PostInitTestClassOptional(Streamable):
     a: Optional[uint8]
     b: Optional[uint8]
-    c: Optional[Optional[uint8]]
-    d: Optional[Optional[uint8]]
+    c: Union[None, uint8]
+    d: Union[None, uint8]
 
 
 @streamable
