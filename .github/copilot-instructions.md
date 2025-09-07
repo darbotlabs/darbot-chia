@@ -40,8 +40,8 @@ Always reference these instructions first and fallback to search or bash command
   - `PYTHONPATH=. ./activated.py python -c "import chia; print('Import successful')"` -- verify installation
   - **Note**: Full CLI may have ConsensusConstants compatibility issues requiring dependency updates
 - **Test basic functionality**:
-  - `PYTHONPATH=. python -c "from chia.util.hash import std_hash; print(std_hash(b'test').hex())"` -- test utilities
-  - `PYTHONPATH=. python -c "from chia.types.blockchain_format.coin import Coin; print('Types work')"` -- test types
+  - `PYTHONPATH=. python -c "import chia; print('✓ Chia import successful')"` -- verify basic imports
+  - **Note**: Many chia utilities require chia_rs package which may have compatibility issues
 
 ## Validation
 - **Pre-commit validation**:
@@ -54,9 +54,9 @@ Always reference these instructions first and fallback to search or bash command
   - `./activated.py python manage-mypy.py build-mypy-ini` -- update mypy config
   - **Note**: Full mypy validation may fail due to version compatibility issues
 - **Manual testing scenarios**:
-  - Verify chia module imports work: `PYTHONPATH=. python -c "import chia"`
-  - Test basic utilities: hash functions, types, data structures
-  - **Cannot fully test CLI due to dependency version conflicts** -- document this limitation
+  - Verify chia module imports work: `PYTHONPATH=. python -c "import chia; print('✓ Success')"`
+  - **Note**: Many specific utilities require chia_rs package with version compatibility
+  - **Cannot fully test CLI or advanced features due to dependency version conflicts** -- document this limitation
 
 ## Common Tasks
 
@@ -68,8 +68,8 @@ Always reference these instructions first and fallback to search or bash command
 - **After making changes**:
   - Format: `ruff format .` 
   - Lint: `ruff check --fix .`
-  - Test imports: `PYTHONPATH=. python -c "import chia"`
-  - **Note**: Full pytest may fail due to dependency issues
+  - Test basic imports: `PYTHONPATH=. python -c "import chia; print('✓ Basic imports work')"`
+  - **Note**: Full pytest and advanced functionality may fail due to dependency issues
 
 ### Repository Structure
 ```
