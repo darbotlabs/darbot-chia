@@ -8,20 +8,22 @@ and providing access to Chia blockchain functionality.
 from __future__ import annotations
 
 import json
-from dataclasses import dataclass, asdict
-from typing import Any, Dict, List, Optional, Union, Literal
 from abc import ABC, abstractmethod
+from dataclasses import asdict, dataclass
+from typing import Any, Dict, List, Optional, Union
 
 
 @dataclass
 class MCPMessage:
     """Base class for all MCP messages."""
+
     jsonrpc: str = "2.0"
 
 
-@dataclass 
+@dataclass
 class MCPRequest(MCPMessage):
     """MCP request message."""
+
     method: str = ""
     id: Optional[Union[str, int]] = None
     params: Optional[Dict[str, Any]] = None
@@ -30,6 +32,7 @@ class MCPRequest(MCPMessage):
 @dataclass
 class MCPResponse(MCPMessage):
     """MCP response message."""
+
     id: Optional[Union[str, int]] = None
     result: Optional[Any] = None
     error: Optional[Dict[str, Any]] = None
@@ -38,6 +41,7 @@ class MCPResponse(MCPMessage):
 @dataclass
 class MCPNotification(MCPMessage):
     """MCP notification message (no response expected)."""
+
     method: str = ""
     params: Optional[Dict[str, Any]] = None
 
@@ -45,6 +49,7 @@ class MCPNotification(MCPMessage):
 @dataclass
 class MCPError:
     """MCP error details."""
+
     code: int
     message: str
     data: Optional[Any] = None
@@ -53,6 +58,7 @@ class MCPError:
 @dataclass
 class MCPTool:
     """Defines a tool that can be called via MCP."""
+
     name: str
     description: str
     input_schema: Dict[str, Any]
@@ -61,6 +67,7 @@ class MCPTool:
 @dataclass
 class MCPResource:
     """Defines a resource that can be accessed via MCP."""
+
     uri: str
     name: str
     description: Optional[str] = None
@@ -70,6 +77,7 @@ class MCPResource:
 @dataclass
 class ChiaWalletInfo:
     """Information about a Chia wallet."""
+
     id: int
     name: str
     type: int
@@ -79,6 +87,7 @@ class ChiaWalletInfo:
 @dataclass
 class ChiaTransactionRecord:
     """Information about a Chia transaction."""
+
     confirmed_at_height: int
     created_at_time: int
     to_puzzle_hash: str
@@ -99,16 +108,14 @@ class ChiaTransactionRecord:
 
 class MCPHandler(ABC):
     """Abstract base class for MCP message handlers."""
-    
+
     @abstractmethod
     async def handle_request(self, request: MCPRequest) -> MCPResponse:
         """Handle an MCP request and return a response."""
-        pass
-    
+
     @abstractmethod
     async def handle_notification(self, notification: MCPNotification) -> None:
         """Handle an MCP notification."""
-        pass
 
 
 def serialize_message(message: Union[MCPRequest, MCPResponse, MCPNotification]) -> str:
@@ -119,7 +126,7 @@ def serialize_message(message: Union[MCPRequest, MCPResponse, MCPNotification]) 
 def deserialize_message(data: str) -> Union[MCPRequest, MCPResponse, MCPNotification]:
     """Deserialize a JSON string to an MCP message."""
     parsed = json.loads(data)
-    
+
     if "method" in parsed:
         if "id" in parsed:
             return MCPRequest(**parsed)

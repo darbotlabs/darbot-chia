@@ -45,7 +45,7 @@ def configure(
                 if set_node_introducer.index(":"):
                     host, port = (
                         ":".join(set_node_introducer.split(":")[:-1]),
-                        set_node_introducer.split(":")[-1],
+                        set_node_introducer.rsplit(":", maxsplit=1)[-1],
                     )
                     config["full_node"]["introducer_peer"]["host"] = host
                     config["full_node"]["introducer_peer"]["port"] = int(port)
@@ -59,7 +59,7 @@ def configure(
                 if set_farmer_peer.index(":"):
                     host, port = (
                         ":".join(set_farmer_peer.split(":")[:-1]),
-                        set_farmer_peer.split(":")[-1],
+                        set_farmer_peer.rsplit(":", maxsplit=1)[-1],
                     )
                     set_peer_info(config["harvester"], peer_type=NodeType.FARMER, peer_host=host, peer_port=int(port))
                     print("Farmer peer updated, make sure your harvester has the proper cert installed")

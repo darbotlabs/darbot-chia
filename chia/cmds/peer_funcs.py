@@ -13,7 +13,7 @@ async def add_node_connection(rpc_client: RpcClient, add_connection: str) -> Non
     else:
         ip, port = (
             ":".join(add_connection.split(":")[:-1]),
-            add_connection.split(":")[-1],
+            add_connection.rsplit(":", maxsplit=1)[-1],
         )
         print(f"Connecting to {ip}, {port}")
         try:
