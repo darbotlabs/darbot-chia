@@ -97,6 +97,16 @@ Always reference these instructions first and fallback to search or bash command
 │   ├── harvester/         # Plot scanning and proof generation
 │   │   ├── harvester.py   # Main harvester implementation
 │   │   └── harvester_api.py # Harvester RPC interface
+│   ├── mcp/               # Model Context Protocol (MCP) server [FORK-SPECIFIC]
+│   │   ├── server.py      # Main MCP server with plugin system
+│   │   ├── protocol.py    # MCP protocol messages and types
+│   │   ├── cli.py         # Command-line interface for MCP server
+│   │   ├── websocket_server.py # WebSocket transport layer
+│   │   └── plugins/       # Extensible plugin system
+│   │       ├── base.py    # Base plugin class and interfaces
+│   │       ├── wallet.py  # Wallet operations plugin (6 tools)
+│   │       ├── blockchain.py # Blockchain analysis plugin (9 tools) 
+│   │       └── farming.py # Farming operations plugin (9 tools)
 │   ├── plotting/          # Plot creation and management
 │   │   ├── create_plots.py # Plot generation workflow
 │   │   ├── manager.py     # Plot lifecycle management
@@ -142,6 +152,11 @@ Always reference these instructions first and fallback to search or bash command
 ├── chia-blockchain-gui/   # Electron-based GUI (submodule)
 ├── build_scripts/         # Platform-specific build tools
 ├── tools/                 # Development and maintenance tools
+├── mcp_demo.py            # Basic MCP protocol demonstration [FORK-SPECIFIC]
+├── mcp_demo_enhanced.py   # Enhanced MCP plugin system demo [FORK-SPECIFIC]
+├── example_mcp_client.py  # MCP client example [FORK-SPECIFIC]
+├── MCP_README.md          # MCP documentation and usage guide [FORK-SPECIFIC]
+├── FORK_SYNC_GUIDE.md     # Guide for syncing with upstream Chia [FORK-SPECIFIC]
 ├── pyproject.toml         # Poetry project configuration
 ├── pytest.ini            # Test framework configuration
 ├── ruff.toml             # Code linting configuration
@@ -166,11 +181,33 @@ Always reference these instructions first and fallback to search or bash command
 - **Testing Limitations**: pytest may fail on configuration loading due to ConsensusConstants issues
 - **Workaround**: Use `PYTHONPATH=.` for direct Python imports and testing of individual modules
 
+## Fork-Specific Considerations (darbot-chia)
+
+### Key Differences from Upstream Chia
+- **MCP Integration**: This fork adds comprehensive MCP (Model Context Protocol) server functionality
+- **AI-First Design**: Tools and resources specifically designed for AI model integration
+- **GitHub Actions Modifications**: Workflow restrictions for fork compatibility (`if: github.repository == 'Chia-Network/chia-blockchain'`)
+- **Security Enhancements**: Clear-text logging fixes and improved security practices
+- **Build System Adaptations**: Custom build configurations for fork environment
+
+### Syncing with Upstream
+- **Never force push**: Preserve fork-specific customizations during upstream syncs
+- **Careful conflict resolution**: Keep MCP functionality and workflow modifications
+- **Reference documentation**: See `FORK_SYNC_GUIDE.md` for detailed sync procedures
+- **Preserve customizations**: Maintain GitHub Actions restrictions and security fixes
+
+### Development Priority
+1. **MCP functionality first**: This is the primary value-add of the fork
+2. **Chia core compatibility**: Maintain compatibility with upstream Chia features  
+3. **AI integration**: Optimize for GitHub Copilot and other AI development tools
+4. **Documentation**: Keep MCP documentation current and comprehensive
+
 ### Emergency Troubleshooting
 - If installation fails with timeouts: wait and retry the exact same command
 - If chia imports fail: check PYTHONPATH and virtual environment activation
 - If tests fail with ConsensusConstants errors: this is a known compatibility issue
 - If network errors persist: check firewall and DNS settings for PyPI access
+- **MCP specific**: If MCP server fails to start, ensure Chia wallet is running and RPC is accessible
 
 ## Technical Development Workflows
 
@@ -288,10 +325,73 @@ Always reference these instructions first and fallback to search or bash command
 
 ## Important Notes
 - This is a Python 3.9+ cryptocurrency blockchain project using Poetry for dependency management
+- **FORK-SPECIFIC**: This is darbot-chia, a fork that adds Model Context Protocol (MCP) server functionality
 - Has extensive CI/CD workflows and comprehensive development tooling
 - Requires significant build time due to cryptographic dependencies (chiapos, chiavdf, etc.)
 - **Always allow full completion time for installations and builds**
 - Development tools (ruff, mypy, pre-commit) work reliably for code quality checks
+
+## MCP (Model Context Protocol) Development
+
+**This fork's primary enhancement**: MCP server for AI model integration with Chia blockchain.
+
+### MCP Architecture Overview
+- **MCP Server**: `/chia/mcp/` - Core MCP protocol implementation for Chia
+  - `server.py` - Main MCP server with plugin system
+  - `protocol.py` - MCP protocol messages and types  
+  - `cli.py` - Command-line interface for server management
+  - `websocket_server.py` - WebSocket transport layer
+  - `plugins/` - Extensible plugin system for functionality
+
+### Working with MCP Components
+- **Protocol Testing** (no dependencies required):
+  ```bash
+  # Test basic MCP protocol without full installation
+  PYTHONPATH=. python mcp_demo.py
+  PYTHONPATH=. python mcp_demo_enhanced.py
+  
+  # Test protocol imports
+  PYTHONPATH=. python -c "from chia.mcp.protocol import MCPResource; print('✓ MCP protocol available')"
+  ```
+- **Plugin Development**:
+  ```bash
+  # Test plugin imports (requires dependencies)
+  PYTHONPATH=. python -c "from chia.mcp.plugins import WalletPlugin; print('✓ MCP plugins available')"
+  ```
+- **Files**: `chia/mcp/plugins/base.py`, `chia/mcp/plugins/wallet.py`, `chia/mcp/plugins/blockchain.py`, `chia/mcp/plugins/farming.py`
+- **Key classes**: `MCPPlugin`, `WalletPlugin`, `BlockchainPlugin`, `FarmingPlugin`
+- **Demo files**: `mcp_demo.py`, `mcp_demo_enhanced.py` - Standalone demos showing MCP functionality
+
+### MCP Server Usage
+- **Start MCP Server**: `python -m chia.mcp.cli` (requires Chia wallet running)
+- **WebSocket Server**: `python -m chia.mcp.websocket_server` (WebSocket transport on port 8080)
+- **List Tools**: `python -m chia.mcp.cli --list-tools` 
+- **List Plugins**: `python -m chia.mcp.cli --list-plugins`
+- **Connection**: AI models connect via `ws://localhost:8080`
+
+### MCP Features (darbot-chia specific)
+- **24 Tools** organized in hierarchical namespaces:
+  - `wallet.*` - 6 tools for wallet management, balance, transactions
+  - `blockchain.*` - 9 tools for network status, blocks, consensus  
+  - `farming.*` - 9 tools for plots, harvesting, farming analytics
+- **35 Resources** for blockchain data access
+- **Plugin System** - Extensible architecture for adding new functionality
+- **Rich Schemas** - Detailed parameter validation and examples for AI integration
+
+### MCP Development Workflows
+- **Adding New Plugins**:
+  1. Create plugin class inheriting from `MCPPlugin` in `chia/mcp/plugins/`
+  2. Register tools and resources using `add_tool()` and `add_resource()`
+  3. Implement tool handlers with proper schemas
+  4. Add plugin to `PluginManager` in `chia/mcp/plugins/__init__.py`
+- **Testing Plugins**:
+  - Use `mcp_demo_enhanced.py` to test plugin registration
+  - Test individual tool functionality without server
+  - Validate schemas and examples
+- **MCP Protocol Extensions**:
+  - Extend `protocol.py` for new message types
+  - Follow MCP specification for compatibility
+  - Test with standalone demos before server integration
 
 ## Chia Blockchain Architecture Deep Dive
 
