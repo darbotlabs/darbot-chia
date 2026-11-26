@@ -22,17 +22,21 @@ def launch_start_daemon(root_path: Path) -> subprocess.Popen:
     if sys.platform == "win32":
         creationflags = subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
 
-    path_helper: Path = Path(sys.argv[0])
-    cmd_to_execute = None
-    if len(path_helper.suffix) == 0:
-        cmd_to_execute = shutil.which(cmd=path_helper.name, path=path_helper.parent)
+    cmd_to_execute = sys.argv[0]
+    if sys.platform == "win32":
+        path_helper = Path(cmd_to_execute)
+        cmd_shim = path_helper.with_suffix(".cmd")
+        if cmd_shim.is_file():
+            cmd_to_execute = str(cmd_shim)
 
-    if cmd_to_execute is None:
-        cmd_to_execute = sys.argv[0]
+    if sys.platform == "win32" and cmd_to_execute.endswith(".cmd"):
+        command = [cmd_to_execute, "run_daemon", "--wait-for-unlock"]
+    else:
+        command = [sys.executable, "-m", "chia", "run_daemon", "--wait-for-unlock"]
 
-    print(f"Starting daemon: {cmd_to_execute} run_daemon --wait-for-unlock", flush=True)
+    print(f"Starting daemon: {' '.join(command)}", flush=True)
     process = subprocess.Popen(
-        [cmd_to_execute, "run_daemon", "--wait-for-unlock"],
+        command,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
         stdin=subprocess.DEVNULL,
